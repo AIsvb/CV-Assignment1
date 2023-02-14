@@ -3,7 +3,7 @@ import numpy as np
 from SelectCornersInterface import SelectCornersInterface
 
 # Selecting the corners manually
-IF = SelectCornersInterface("C:/Users/svben/Downloads/lenna.png")
+IF = SelectCornersInterface("/Users/macbook/Desktop/testfoto.jpg")
 
 # Showing the selected corners on the image
 IF.show_corners()
