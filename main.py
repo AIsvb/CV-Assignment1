@@ -6,7 +6,7 @@ from SelectCornersInterface import SelectCornersInterface
 IF = SelectCornersInterface("/Users/macbook/Desktop/testfoto.jpg")
 
 # Showing the selected corners on the image
-IF.show_corners()
+IF.show_corners2()
 
 # Printing the coordinates of the corners
 print(IF.corners)
