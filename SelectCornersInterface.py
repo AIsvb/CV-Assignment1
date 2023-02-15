@@ -127,14 +127,14 @@ class SelectCornersInterface:
     # Method to sort the corner top-left, top-right, bottom-left, bottom-right
     def sort_corners(self, corners):
         tuples = sorted(((corners[0][0], corners[0][1]), (corners[1][0], corners[1][1]), (corners[2][0], corners[2][1]),
-                   (corners[3][0], corners[3][1])))
+                   (corners[3][0], corners[3][1])), key=lambda x: x[1] )
 
-        if tuples[1][1] < tuples[0][1]:
+        if tuples[1][0] < tuples[0][0]:
             temp = tuples[0]
             tuples[0] = tuples[1]
             tuples[1] = temp
 
-        if tuples[3][1] < tuples[2][1]:
+        if tuples[3][0] < tuples[2][0]:
             temp = tuples[2]
             tuples[2] = tuples[3]
             tuples[3] = temp
