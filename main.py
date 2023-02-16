@@ -12,3 +12,4 @@ IF.show_corners2()
 
 # Printing the coordinates of the corners
 print(IF.corners)
+

@@ -28,16 +28,42 @@ def calibrate(image_names, board_shape):
             imgpoints.append(corners2)
 
             # Draw and display the corners
-            cv2.drawChessboardCorners(img, (9, 6), corners2, ret)
+            cv2.drawChessboardCorners(img, (board_shape[0], board_shape[1]), corners2, ret)
             cv2.namedWindow("image", cv2.WINDOW_NORMAL)
             cv2.imshow('image', img)
             cv2.waitKey(0)
+
+        else:
+            pass
         cv2.destroyAllWindows()
 
     ret, camera_matrix, distortion_coef, rot_vecs, trans_vecs = cv2.calibrateCamera(objpoints, imgpoints,
                                                                                     gray.shape[::-1], None, None)
 
-    return camera_matrix, distortion_coef
+    return camera_matrix, distortion_coef, rot_vecs, trans_vecs
 
+from Calibrate import calibrate
+import glob
+from SelectCornersInterface import SelectCornersInterface
 
+# Collecting filenames
 
+# 25 images for which the findChessboardCorners function is succesful
+images_auto = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/WhatsApp*")
+
+# 5 images for which the findChessboardCorners function is not succesful
+images_manual = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/Manual*")
+
+# test image
+test_img = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/test.jpeg")
+
+# Run 1
+camera_matrix_1, distortion_coef_1, rot_vecs_1, trans_vecs_1 = calibrate(images_manual+images_manual)
+
+# Run 2
+selection_1 = images_auto[0:10]
+camera_matrix_2, distortion_coef_2, rot_vecs_2, trans_vecs_2 = calibrate(selection_1)
+
+# Run 3
+selection_2 = images_auto[0:5]
+camera_matrix_3, distortion_coef_3, rot_vecs_3, trans_vecs_3 = calibrate(selection_2)
