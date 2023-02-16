@@ -3,6 +3,11 @@ import glob
 from SelectCornersInterface import SelectCornersInterface
 
 # Collecting filenames
+IF = SelectCornersInterface("/Users/macbook/Desktop/testfoto.jpg")
+# Showing the selected corners on the image
+IF.show_corners2()
+# Printing the coordinates of the corners
+print(IF.corners)
 
 # 25 images for which the findChessboardCorners function is succesful
 images_auto = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/WhatsApp*")

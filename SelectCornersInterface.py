@@ -87,6 +87,9 @@ class SelectCornersInterface:
 
     # Method to linearly interpolate the inner corners
     def interpolate_points(self, corners, height, width):
+        # Array for calculated
+        calculated_corners = []
+
         # Sort corners
         sorted_corners = self.sort_corners(corners)
         topleft = sorted_corners[0]
@@ -119,15 +122,17 @@ class SelectCornersInterface:
 
             # Fill calculated_corners
             for j in range(height):
-                self.calculated_corners.append((float(x_interpolate(top_points[i][1] + (j * step_size))),
-                                                top_points[i][1] + (j * step_size)))
-            self.calculated_corners.append((bottom_points[i][0], bottom_points[i][1]))
-        print("Hi")
+                self.calculated_corners.append([float(x_interpolate(top_points[i][1] + (j * step_size))),
+                                                top_points[i][1] + (j * step_size)])
+            self.calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
+
+        new_corners = np.array(self.calculated_corners).reshape((88, 1, 2))
+        print(new_corners)
 
     # Method to sort the corner top-left, top-right, bottom-left, bottom-right
     def sort_corners(self, corners):
-        new_corners = np.array(sorted(((corners[0][0], corners[0][1]), (corners[1][0], corners[1][1]), (corners[2][0], corners[2][1]),
-                   (corners[3][0], corners[3][1])), key=lambda x: x[1]))
+        new_corners = sorted(((corners[0][0], corners[0][1]), (corners[1][0], corners[1][1]), (corners[2][0], corners[2][1]),
+                   (corners[3][0], corners[3][1])), key=lambda x: x[1])
 
         if new_corners[1][0] < new_corners[0][0]:
             temp = np.copy(new_corners[0])
