@@ -9,7 +9,6 @@ class SelectCornersInterface:
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.click = 0
         self.corners = np.empty((4, 2), dtype=float)
-        self.calculated_corners = []
         self.show_img()
 
     def show_img(self):
@@ -73,11 +72,8 @@ class SelectCornersInterface:
     def show_corners2(self):
         self.img = cv2.imread(self.path)
         # Writing the coordinates of each corner on the image
-        for i in range(len(self.calculated_corners)):
-            x = int(self.calculated_corners[i][0])
-            y = int(self.calculated_corners[i][1])
-            cv2.circle(self.img, (x, y), 10, (0, 0, 255), -1)
-
+        corners2 = self.interpolate_points(self.corners, 10, 7)
+        cv2.(self.img, [10, 7], corners2)
         # Displaying the coordinates on the image window
         cv2.namedWindow("image", cv2.WINDOW_NORMAL)
         cv2.imshow("image", self.img)
@@ -122,12 +118,12 @@ class SelectCornersInterface:
 
             # Fill calculated_corners
             for j in range(height):
-                self.calculated_corners.append([float(x_interpolate(top_points[i][1] + (j * step_size))),
+                calculated_corners.append([float(x_interpolate(top_points[i][1] + (j * step_size))),
                                                 top_points[i][1] + (j * step_size)])
-            self.calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
+            calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
 
-        new_corners = np.array(self.calculated_corners).reshape((88, 1, 2))
-        print(new_corners)
+        self.new_corners = np.array(calculated_corners).reshape((88, 1, 2))
+        return(self.new_corners)
 
     # Method to sort the corner top-left, top-right, bottom-left, bottom-right
     def sort_corners(self, corners):
