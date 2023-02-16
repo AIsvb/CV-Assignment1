@@ -20,4 +20,4 @@ def undistort(image, camera_matrix, distortion_coef, path):
     # Cropping the image and saving it
     x, y, w, h = roi
     dst = dst[y:y+h, x:x+w]
-    cv2.imwrite(path + "/calibration_result.png", dst)
+    cv2.imwrite(path, dst)

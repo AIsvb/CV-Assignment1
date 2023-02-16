@@ -5,13 +5,13 @@ from scipy.interpolate import interp1d
 class SelectCornersInterface:
     def __init__(self, path, size):
         self.size = size
+        self.click = 0
         self.path = path
         self.img = cv2.imread(path)
         self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.click = 0
         self.corners = np.empty((4, 2), dtype=float)
         self.show_img()
-        self.new_corners = np.empty((self.size[0]*self.size[1], 1, 2))
+        self.new_corners = self.interpolate_points(self.corners, self.size[0], self.size[1])
 
     def show_img(self):
         # Printing the instructions for the user on the image
@@ -51,14 +51,13 @@ class SelectCornersInterface:
 
             # Closing the interface after four points have been selected
             if self.click == 4:
-                self.interpolate_points(self.corners, self.size[0], self.size[1])
                 cv2.waitKey(1000)
                 cv2.destroyAllWindows()
 
     def show_corners(self):
         img = cv2.imread(self.path)
         # Writing the coordinates of each corner on the image
-        img = cv2.drawChessboardCorners(self.img, (self.size[0]+1, self.size[1]+1), self.interpolate_points(self.corners, self.size[0], self.size[1]), True)
+        img = cv2.drawChessboardCorners(img, (self.size[0]+1, self.size[1]+1), self.new_corners, True)
         # Displaying the coordinates on the image window
         cv2.namedWindow("image", cv2.WINDOW_NORMAL)
         cv2.imshow("image", img)
