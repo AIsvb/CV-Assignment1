@@ -1,13 +1,5 @@
 from Calibrate import calibrate
 import glob
-from SelectCornersInterface import SelectCornersInterface
-
-# Collecting filenames
-IF = SelectCornersInterface("/Users/macbook/Desktop/testfoto.jpg")
-# Showing the selected corners on the image
-IF.show_corners2()
-# Printing the coordinates of the corners
-print(IF.corners)
 
 # 25 images for which the findChessboardCorners function is succesful
 images_auto = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/WhatsApp*")
@@ -28,3 +20,14 @@ camera_matrix_2, distortion_coef_2, rot_vecs_2, trans_vecs_2 = calibrate(selecti
 # Run 3
 selection_2 = images_auto[0:5]
 camera_matrix_3, distortion_coef_3, rot_vecs_3, trans_vecs_3 = calibrate(selection_2)
+
+'''
+from SelectCornersInterface import SelectCornersInterface
+
+# Collecting filenames
+IF = SelectCornersInterface("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/test.jpeg", (8,5))
+# Showing the selected corners on the image
+IF.show_corners()
+# Printing the coordinates of the corners
+print(IF.corners)
+'''

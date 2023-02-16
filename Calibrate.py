@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
-import glob
-
+from SelectCornersInterface import SelectCornersInterface
 
 def calibrate(image_names, board_shape):
     # termination criteria
@@ -19,7 +18,7 @@ def calibrate(image_names, board_shape):
         img = cv2.imread(image)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        ret, corners = cv2.findChessboardCorners(gray, (board_shape[0], board_shape[1]), None)
+        ret, corners = cv2.findChessboardCorners(gray, (board_shape[0]+1, board_shape[1]+1), None)
 
         if ret:
             objpoints.append(object_points)
@@ -34,7 +33,13 @@ def calibrate(image_names, board_shape):
             cv2.waitKey(0)
 
         else:
-            pass
+            IF = SelectCornersInterface(image)
+
+            objpoints.append(object_points)
+            corners = IF.new_corners
+            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+            imgpoints.append(corners2)
+
         cv2.destroyAllWindows()
 
     ret, camera_matrix, distortion_coef, rot_vecs, trans_vecs = cv2.calibrateCamera(objpoints, imgpoints,

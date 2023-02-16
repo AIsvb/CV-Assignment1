@@ -3,13 +3,15 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 class SelectCornersInterface:
-    def __init__(self, path):
+    def __init__(self, path, size):
+        self.size = size
         self.path = path
         self.img = cv2.imread(path)
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.click = 0
         self.corners = np.empty((4, 2), dtype=float)
         self.show_img()
+        self.new_corners = np.empty((self.size[0]*self.size[1], 1, 2))
 
     def show_img(self):
         # Printing the instructions for the user on the image
@@ -49,34 +51,17 @@ class SelectCornersInterface:
 
             # Closing the interface after four points have been selected
             if self.click == 4:
-                self.interpolate_points(self.corners, 10, 7)
+                self.interpolate_points(self.corners, self.size[0], self.size[1])
                 cv2.waitKey(1000)
                 cv2.destroyAllWindows()
 
     def show_corners(self):
-        self.img = cv2.imread(self.path)
+        img = cv2.imread(self.path)
         # Writing the coordinates of each corner on the image
-        for corner in self.corners:
-            cv2.circle(self.img, (corner[0], corner[1]), 10, (0, 0, 255), -1)
-            cv2.putText(self.img, str(corner[0]) + ',' +
-                        str(corner[1]), (corner[0], corner[1]), self.font,
-                        1, (255, 0, 0), 2)
-
+        img = cv2.drawChessboardCorners(self.img, (self.size[0]+1, self.size[1]+1), self.interpolate_points(self.corners, self.size[0], self.size[1]), True)
         # Displaying the coordinates on the image window
         cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-        cv2.imshow("image", self.img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-    # Tijdelijke methode om de interpolated punten te laten zien
-    def show_corners2(self):
-        self.img = cv2.imread(self.path)
-        # Writing the coordinates of each corner on the image
-        corners2 = self.interpolate_points(self.corners, 10, 7)
-        cv2.(self.img, [10, 7], corners2)
-        # Displaying the coordinates on the image window
-        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-        cv2.imshow("image", self.img)
+        cv2.imshow("image", img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         cv2.waitKey(1)
@@ -122,8 +107,7 @@ class SelectCornersInterface:
                                                 top_points[i][1] + (j * step_size)])
             calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
 
-        self.new_corners = np.array(calculated_corners).reshape((88, 1, 2))
-        return(self.new_corners)
+        return np.array(calculated_corners, dtype=np.float32).reshape(((self.size[0]+1)*(self.size[1]+1), 1, 2))
 
     # Method to sort the corner top-left, top-right, bottom-left, bottom-right
     def sort_corners(self, corners):
