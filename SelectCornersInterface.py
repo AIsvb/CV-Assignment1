@@ -70,35 +70,36 @@ class SelectCornersInterface:
         # Array for calculated
         calculated_corners = []
 
+        # Termination criteria for cornerSubPix
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
         # Sort corners
         sorted_corners = self.sort_corners(corners)
-        topleft = sorted_corners[0]
-        topright = sorted_corners[1]
-        bottomleft = sorted_corners[2]
-        bottomright = sorted_corners[3]
+        top_left = sorted_corners[0]
+        top_right = sorted_corners[1]
+        bottom_left = sorted_corners[2]
+        bottom_right = sorted_corners[3]
 
         # Lists of top and bottom (x,y) tuples, starts off empty
         top_points = []
         bottom_points = []
 
         # Interpolate y-coordinates between top-left and top-right, fill top_points
-        step_size = (topright[0] - topleft[0]) / width
-        y_interpolate = interp1d([topleft[0], topright[0]], [topleft[1], topright[1]])
+        step_size = (top_right[0] - top_left[0]) / width
+        y_interpolate = interp1d([top_left[0], top_right[0]], [top_left[1], top_right[1]])
         for i in range(width + 1):
-            top_points.append((topleft[0] + i * step_size, float(y_interpolate(topleft[0] + i * step_size))))
+            top_points.append((top_left[0] + i * step_size, float(y_interpolate(top_left[0] + i * step_size))))
 
         # Interpolate y-coordinates between bottom-left and bottom-right, fill bottom_points
-        step_size = (bottomright[0] - bottomleft[0]) / width
-        y_interpolate = interp1d([bottomleft[0], bottomright[0]], [bottomleft[1], bottomright[1]])
+        step_size = (bottom_right[0] - bottom_left[0]) / width
+        y_interpolate = interp1d([bottom_left[0], bottom_right[0]], [bottom_left[1], bottom_right[1]])
         for i in range(width + 1):
-            bottom_points.append((bottomleft[0] + i * step_size, float(y_interpolate(bottomleft[0] + i * step_size))))
+            bottom_points.append((bottom_left[0] + i * step_size, float(y_interpolate(bottom_left[0] + i * step_size))))
 
         # Interpolate points between all top and bottom points
         for i in range(len(top_points)):
-            x_interpolate = interp1d([top_points[i][1], bottom_points[i][1]], [top_points[i][0], bottom_points[i][0]])
-
-            # Determine step size per row based on top and bottom y-coordinate
             step_size = (bottom_points[i][1] - top_points[i][1]) / height
+            x_interpolate = interp1d([top_points[i][1], bottom_points[i][1]], [top_points[i][0], bottom_points[i][0]])
 
             # Fill calculated_corners
             for j in range(height):
@@ -106,7 +107,10 @@ class SelectCornersInterface:
                                                 top_points[i][1] + (j * step_size)])
             calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
 
-        return np.array(calculated_corners, dtype=np.float32).reshape(((self.size[0]+1)*(self.size[1]+1), 1, 2))
+        interpolated_corners = np.array(calculated_corners, dtype=np.float32).reshape(((self.size[0]+1)*(self.size[1]+1), 1, 2))
+
+        improved_corners = cv2.cornerSubPix(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY), interpolated_corners, (11, 11), (-1, -1), criteria)
+        return improved_corners
 
     # Method to sort the corner top-left, top-right, bottom-left, bottom-right
     def sort_corners(self, corners):
