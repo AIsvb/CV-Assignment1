@@ -1,3 +1,8 @@
+# Computer Vision: Camera calibration assignment
+# Creators: Gino Kuiper en Sander van Bennekom
+# Date: 17-02-2023
+# Recourses: docs.opencv.org
+
 import cv2
 import numpy as np
 from scipy.interpolate import interp1d

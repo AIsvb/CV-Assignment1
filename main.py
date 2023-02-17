@@ -1,8 +1,13 @@
-# Main script. This file must be run to do the three different calibration runs. Depending on the location
-# of the chessboard images, the file paths must be changed.
+# Computer Vision: Camera calibration assignment
+# Creators: Gino Kuiper en Sander van Bennekom
+# Date: 17-02-2023
+# Recourses: docs.opencv.org
 
 import glob
 from Program import Program
+
+# Main script. This file must be run to do the three different calibration runs. Depending on the location
+# of the chessboard images, the file paths must be changed.
 
 if __name__ == "__main__":
     # Collecting the filenames
