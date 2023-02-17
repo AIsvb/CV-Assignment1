@@ -5,18 +5,20 @@ from SelectCornersInterface import SelectCornersInterface
 
 
 class Program:
-    def __init__(self, image_names, board_shape):
-        self.camera_matrix, self.distortion_coef, _, _ = self.calibrate(image_names, board_shape, True)
-        self.PE = PoseEstimator(self.camera_matrix, self.distortion_coef)
+    def __init__(self, image_names, board_shape, cell_size):
+        self.n_corners = (board_shape[0]+1, board_shape[1]+1)
+        self.board_shape = board_shape
+        self.cell_size = cell_size
+        self.camera_matrix, self.distortion_coef, _, _ = self.calibrate(image_names)
+        self.PE = PoseEstimator(self.camera_matrix, self.distortion_coef, board_shape, cell_size)
 
-    @staticmethod
-    def calibrate(image_names, board_shape, show=False):
+    def calibrate(self, image_names, show=False):
         # termination criteria
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-        object_points = np.zeros(((board_shape[0] + 1) * (board_shape[1] + 1), 3), np.float32)
-        object_points[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2)
+        object_points = np.zeros(((self.n_corners[0]) * (self.n_corners[1]), 3), np.float32)
+        object_points[:, :2] = np.mgrid[0:self.n_corners[0], 0:self.n_corners[1]].T.reshape(-1, 2)*self.cell_size
 
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
@@ -26,7 +28,7 @@ class Program:
             img = cv2.imread(image)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-            ret, corners = cv2.findChessboardCorners(gray, (board_shape[0] + 1, board_shape[1] + 1), None)
+            ret, corners = cv2.findChessboardCorners(gray, self.n_corners, None)
 
             if ret:
                 objpoints.append(object_points)
@@ -36,20 +38,20 @@ class Program:
 
                 # Draw and display the corners
                 if show:
-                    cv2.drawChessboardCorners(img, (board_shape[0]+1, board_shape[1]+1), corners2, ret)
+                    cv2.drawChessboardCorners(img, self.n_corners, corners2, ret)
                     cv2.namedWindow("image", cv2.WINDOW_NORMAL)
                     cv2.imshow('image', img)
                     cv2.waitKey(0)
 
             else:
-                IF = SelectCornersInterface(image, (8, 5))
+                IF = SelectCornersInterface(image, self.board_shape)
 
                 objpoints.append(object_points)
                 imgpoints.append(IF.new_corners)
 
                 # Draw and display the corners
                 if show:
-                    cv2.drawChessboardCorners(img, (board_shape[0], board_shape[1]), IF.new_corners, ret)
+                    cv2.drawChessboardCorners(img, self.n_corners, IF.new_corners, True)
                     cv2.namedWindow("image", cv2.WINDOW_NORMAL)
                     cv2.imshow('image', img)
                     cv2.waitKey(0)

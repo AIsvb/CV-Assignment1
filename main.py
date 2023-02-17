@@ -11,13 +11,17 @@ if __name__ == "__main__":
     # test image
     test_img = "C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/test.jpeg"
 
-    Run_1 = Program(images_auto + images_manual, (8,5))
-    #Run_2 = Program(images_auto[0:10], (8,5))
-    #Run_3 = Program(images_auto[0:5], (8,5))
+    #Run_1 = Program(images_auto + images_manual, (8,5), 21)
+    #Run_2 = Program(images_auto[0:10], (8,5), 21)
+    Run_3 = Program(images_auto[0:5], (8,5), 21)
 
-    Run_1.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run1.png")
+    #Run_1.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run1.png")
     #Run_2.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run2.png")
-    #Run_3.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run3.png")
+    Run_3.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run3.png")
 
-    print(Run_1.camera_matrix)
+    #Run_1.estimate_pose_live()
+    #Run_2.estimate_pose_live()
+    #Run_3.estimate_pose_live()
+
+    print(Run_3.camera_matrix)
 

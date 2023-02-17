@@ -3,9 +3,11 @@ import cv2
 
 class PoseEstimator:
 
-    def __init__(self, camera_matrix, distortion_coef):
+    def __init__(self, camera_matrix, distortion_coef, board_shape, cell_size):
         self.camera_matrix = camera_matrix
         self.distortion_coef = distortion_coef
+        self.cell_size = cell_size
+        self.n_corners = (board_shape[0]+1, board_shape[1]+1)
 
     def start_live_estimator(self):
         # define a video capture object
@@ -37,7 +39,7 @@ class PoseEstimator:
         img = cv2.line(img, corner, tuple(imgpts[2].ravel().astype(int)), (0, 0, 255), 7)
         return img
 
-    def draw_cube(self, img, corners, imgpts):
+    def draw_cube(self, img, imgpts):
         imgpts = np.int32(imgpts).reshape(-1, 2)
         # draw ground floor in green
         img = cv2.drawContours(img, [imgpts[:4]], -1, (255, 255, 0), 3)
@@ -50,11 +52,11 @@ class PoseEstimator:
 
     def draw_pose(self, img, camera_matrix, distortion_coef):
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-        objp = np.zeros((6 * 9, 3), np.float32)
-        objp[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2)
+        objp = np.zeros((self.n_corners[0]*self.n_corners[1], 3), np.float32)
+        objp[:, :2] = np.mgrid[0:self.n_corners[0], 0:self.n_corners[1]].T.reshape(-1, 2)*21
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        ret, corners = cv2.findChessboardCorners(gray, (9, 6), None)
+        ret, corners = cv2.findChessboardCorners(gray, self.n_corners, None)
 
         if ret == True:
             corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
@@ -63,15 +65,15 @@ class PoseEstimator:
             ret, rvecs, tvecs = cv2.solvePnP(objp, corners2, camera_matrix, distortion_coef)
 
             # project 3D points to image plane
-            axes = np.float32([[4, 0, 0], [0, 4, 0], [0, 0, -4]]).reshape(-1, 3)
+            axes = np.float32([[4, 0, 0], [0, 4, 0], [0, 0, -4]]).reshape(-1, 3)*self.cell_size
             cube = np.float32([[0, 0, 0], [0, 2, 0], [2, 2, 0], [2, 0, 0],
-                               [0, 0, -2], [0, 2, -2], [2, 2, -2], [2, 0, -2]])
+                               [0, 0, -2], [0, 2, -2], [2, 2, -2], [2, 0, -2]])*self.cell_size
 
             imgpts_a, _ = cv2.projectPoints(axes, rvecs, tvecs, camera_matrix, distortion_coef)
             imgpts_c, _ = cv2.projectPoints(cube, rvecs, tvecs, camera_matrix, distortion_coef)
 
             img = self.draw_axes(img, corners2, imgpts_a)
-            img = self.draw_cube(img, corners2, imgpts_c)
+            img = self.draw_cube(img, imgpts_c)
 
         return img
 
