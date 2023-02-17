@@ -1,13 +1,16 @@
 import cv2
 import numpy as np
-import SelectCornersInterface
+from PoseEstimator import PoseEstimator
+from SelectCornersInterface import SelectCornersInterface
 
-class CameraCalibrator:
 
+class Program:
     def __init__(self, image_names, board_shape):
-        self.camera_matrix, self.distortion_coef, _, _ = self.calibrate(image_names, board_shape)
+        self.camera_matrix, self.distortion_coef, _, _ = self.calibrate(image_names, board_shape, True)
+        self.PE = PoseEstimator(self.camera_matrix, self.distortion_coef)
 
-    def calibrate(self, image_names, board_shape, show=False):
+    @staticmethod
+    def calibrate(image_names, board_shape, show=False):
         # termination criteria
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -21,7 +24,6 @@ class CameraCalibrator:
 
         for image in image_names:
             img = cv2.imread(image)
-            global gray
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             ret, corners = cv2.findChessboardCorners(gray, (board_shape[0] + 1, board_shape[1] + 1), None)
@@ -34,7 +36,7 @@ class CameraCalibrator:
 
                 # Draw and display the corners
                 if show:
-                    cv2.drawChessboardCorners(img, (board_shape[0], board_shape[1]), corners2, ret)
+                    cv2.drawChessboardCorners(img, (board_shape[0]+1, board_shape[1]+1), corners2, ret)
                     cv2.namedWindow("image", cv2.WINDOW_NORMAL)
                     cv2.imshow('image', img)
                     cv2.waitKey(0)
@@ -58,3 +60,9 @@ class CameraCalibrator:
                                                                                         gray.shape[::-1], None, None)
 
         return camera_matrix, distortion_coef, rot_vecs, trans_vecs
+
+    def estimate_pose_live(self):
+        self.PE.start_live_estimator()
+
+    def estimate_pose(self, path, destination):
+        self.PE.estimate_pose(path, destination)

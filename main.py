@@ -1,25 +1,23 @@
-from Calibrate import calibrate
-from Undistort import undistort
 import glob
-import cv2
-import numpy as np
-from PoseEstimator import PoseEstimator
-from CameraCalibrator import CameraCalibrator
+from Program import Program
 
-# 25 images for which the findChessboardCorners function is succesful
-images_auto = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/WhatsApp*")
+if __name__ == "__main__":
+    # 25 images for which the findChessboardCorners function is succesful
+    images_auto = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/WhatsApp*")
 
-# 5 images for which the findChessboardCorners function is not succesful
-images_manual = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/Manual*")
+    # 5 images for which the findChessboardCorners function is not succesful
+    images_manual = glob.glob("C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/Manual*")
 
-# test image
-test_img = "C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/test.jpeg"
+    # test image
+    test_img = "C:/Users/svben/PycharmProjects/pythonProject/Schaakbord_fotos/test.jpeg"
 
-camera_matrix, distortion_coef, _, _ = calibrate(images_auto[0:10], (8,5))
+    Run_1 = Program(images_auto + images_manual, (8,5))
+    #Run_2 = Program(images_auto[0:10], (8,5))
+    #Run_3 = Program(images_auto[0:5], (8,5))
 
-undistort(test_img, camera_matrix, distortion_coef, "C:/Users/svben/PycharmProjects/pythonProject/result_run2.png")
+    Run_1.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run1.png")
+    #Run_2.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run2.png")
+    #Run_3.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run3.png")
 
-LPE = PoseEstimator(camera_matrix, distortion_coef)
-
-LPE.start_live_estimator()
+    print(Run_1.camera_matrix)
 
