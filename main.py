@@ -23,8 +23,8 @@ if __name__ == "__main__":
     #Run_2.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run2.png")
     #Run_2.estimate_pose(test_img, "/Users/macbook/Desktop/result_run2.png")
     #Run_3.estimate_pose(test_img, "C:/Users/svben/PycharmProjects/pythonProject/result_run3.png")
-    Run_3.estimate_pose(test_img, "/Users/macbook/Desktop/result_run3.png")
+    #Run_3.estimate_pose(test_img, "/Users/macbook/Desktop/result_run3.png")
 
-    print(Run_3.camera_matrix)
+    print(Run_3.print_results())
 
 

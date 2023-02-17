@@ -70,9 +70,6 @@ class SelectCornersInterface:
         # Array for calculated
         calculated_corners = []
 
-        # Termination criteria for cornerSubPix
-        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-
         # Sort corners
         sorted_corners = self.sort_corners(corners)
         top_left = sorted_corners[0]
@@ -108,9 +105,9 @@ class SelectCornersInterface:
             calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
 
         interpolated_corners = np.array(calculated_corners, dtype=np.float32).reshape(((self.board_shape[0]+1)*(self.board_shape[1]+1), 1, 2))
+        self.improve_localization(interpolated_corners)
 
-        improved_corners = cv2.cornerSubPix(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY), interpolated_corners, (11, 11), (-1, -1), criteria)
-        return improved_corners
+        return interpolated_corners
 
     # Method to sort the corner top-left, top-right, bottom-left, bottom-right
     def sort_corners(self, corners):
@@ -129,6 +126,12 @@ class SelectCornersInterface:
 
         return new_corners
 
+    # Method to improve the localization of corner points
+    def improve_localization(self, corners):
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+        improved_corners = cv2.cornerSubPix(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY), corners, (11, 11),
+                                            (-1, -1), criteria)
 
 
 
