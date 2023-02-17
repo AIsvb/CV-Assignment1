@@ -5,33 +5,47 @@ from SelectCornersInterface import SelectCornersInterface
 
 
 class Program:
-    def __init__(self, image_names, board_shape, cell_size):
+    """ Program Class. When initialised with a set of chessboard images,
+    the board shape (measured in number of squares) and the width of the chessboard squares (mm),
+    the camera intrinsics and the distortion coefficients are computed. With this information
+    the pose of the chessboard can then be estimated, either for a single image
+    or in real-time using the webcam output."""
+    def __init__(self, image_names, board_shape, square_size):
         self.fx = []
         self.fy = []
         self.cx = []
         self.cy = []
-        self.n_corners = (board_shape[0]+1, board_shape[1]+1)
-        self.board_shape = board_shape
-        self.cell_size = cell_size
-        self.camera_matrix, self.distortion_coef, _, _ = self.calibrate(image_names)
-        self.PE = PoseEstimator(self.camera_matrix, self.distortion_coef, board_shape, cell_size)
 
+        self.board_shape = board_shape                          # The number of squares in width and height
+        self.n_corners = (board_shape[0]+1, board_shape[1]+1)   # The number of corners to be detected
+        self.square_size = square_size                          # THe size of the squares in mm
+
+        # Computing and saving the camera matrix and distortion coefficients
+        self.camera_matrix, self.distortion_coef, _, _ = self.calibrate(image_names)
+
+        # Creating and object of the PoseEstimator class
+        self.PE = PoseEstimator(self.camera_matrix, self.distortion_coef, board_shape, square_size)
+
+    # Method that computes the camera intrinsics, extrinsics and distortion coefficients given a set of
+    # chessboard images.
     def calibrate(self, image_names, show=False):
         # termination criteria
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
         object_points = np.zeros(((self.n_corners[0]) * (self.n_corners[1]), 3), np.float32)
-        object_points[:, :2] = np.mgrid[0:self.n_corners[0], 0:self.n_corners[1]].T.reshape(-1, 2)*self.cell_size
+        object_points[:, :2] = np.mgrid[0:self.n_corners[0], 0:self.n_corners[1]].T.reshape(-1, 2)*self.square_size
 
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
         imgpoints = []  # 2d points in image plane.
 
         for image in image_names:
+            # Reading the image and converting it to gray scale
             img = cv2.imread(image)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+            # Finding the chessboard corners
             ret, corners = cv2.findChessboardCorners(gray, self.n_corners, None)
 
             if ret:
@@ -52,7 +66,9 @@ class Program:
                     cv2.waitKey(0)
 
             else:
+                # If the OpenCV can not find the corners, create an instance of the interface for manual extraction
                 IF = SelectCornersInterface(image, self.board_shape)
+
                 # If the re-projection error of the image is larger than 1, do not include the image in the calibration
                 if self.calculate_reprojection_error(image, IF.new_corners, object_points) >= 1:
                     continue
@@ -69,17 +85,21 @@ class Program:
 
             cv2.destroyAllWindows()
 
+        # Performing the calibration
         ret, camera_matrix, distortion_coef, rot_vecs, trans_vecs = cv2.calibrateCamera(objpoints, imgpoints,
                                                                                         gray.shape[::-1], None, None)
         return camera_matrix, distortion_coef, rot_vecs, trans_vecs
 
+    # Method that starts the real-time estimation of the chessboard pose.
     def estimate_pose_live(self):
         self.PE.start_live_estimator()
 
+    # Method that draws the world 3D axes and a cube on a given chessboard image to indicate its pose. The
+    # resulting image is saved to the specified destination.
     def estimate_pose(self, path, destination):
         self.PE.estimate_pose(path, destination)
 
-    # Method to calculate the re-projection error and to store intrinsic parameters in the lists
+    # Method to calculate the re-projection error and to store intrinsic parameters in the lists.
     def calculate_reprojection_error(self, image, image_points, object_points):
         img = cv2.imread(image)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -89,6 +109,7 @@ class Program:
         imgpoints.append(image_points)
         objpoints.append(object_points)
 
+        # Performing the calibration
         ret, camera_matrix, distortion_coef, rot_vecs, trans_vecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
         mean_error = 0

@@ -2,10 +2,14 @@ import cv2
 import numpy as np
 from scipy.interpolate import interp1d
 
+
 class SelectCornersInterface:
+    """ An instance of this class is an interface in which the four corner points of a chessboard
+    can be selected manually. The class has a method to interpolate the
+    remaining corners that are between the four selected corners. """
     def __init__(self, path, board_shape):
         self.board_shape = board_shape
-        self.click = 0
+        self.click = 0      # The number of times a corner was selected
         self.path = path
         self.img = cv2.imread(path)
         self.font = cv2.FONT_HERSHEY_SIMPLEX
@@ -13,8 +17,9 @@ class SelectCornersInterface:
         self.show_img()
         self.new_corners = self.interpolate_points(self.corners, board_shape[0], board_shape[1])
 
+    # Method that displays the image in which the four corners must be selected.
     def show_img(self):
-        # Printing the instructions for the user on the image
+        # Printing the instructions for the user on the image.
         text = "Select corners"
         t_size = cv2.getTextSize(text, self.font, 2, 4)
         text_x = int((self.img.shape[1] - t_size[0][0]) / 2)
@@ -22,12 +27,12 @@ class SelectCornersInterface:
 
         cv2.putText(self.img, text, (text_x, text_y), self.font, 2,
                     (255, 0, 255), 4)
+
         # displaying the image
         cv2.namedWindow("image", cv2.WINDOW_NORMAL)
         cv2.imshow('image', self.img)
 
-        # setting mouse handler for the image
-        # and calling the click_event() function
+        # setting mouse handler for the image and calling the click_event() function
         cv2.setMouseCallback('image', self.click_event)
 
         # wait for a key to be pressed to exit
@@ -36,6 +41,8 @@ class SelectCornersInterface:
         # close the window
         cv2.destroyAllWindows()
 
+    # Method that handles a click event by saving the mouse coordinates and displaying the selected point as a
+    # red circle.
     def click_event(self, event, x, y, flags, params):
         if event == cv2.EVENT_LBUTTONDOWN:
             # Increasing the number of clicks by 1 after a corner point is selected
@@ -54,6 +61,7 @@ class SelectCornersInterface:
                 cv2.waitKey(1000)
                 cv2.destroyAllWindows()
 
+    # Method that shows the interpolated chessboard corners.
     def show_corners(self):
         img = cv2.imread(self.path)
         # Writing the coordinates of each corner on the image
@@ -65,7 +73,7 @@ class SelectCornersInterface:
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
-    # Method to linearly interpolate the inner corners
+    # Method to linearly interpolate the inner corners.
     def interpolate_points(self, corners, height, width):
         # Array for calculated
         calculated_corners = []
@@ -109,7 +117,7 @@ class SelectCornersInterface:
 
         return interpolated_corners
 
-    # Method to sort the corner top-left, top-right, bottom-left, bottom-right
+    # Method to sort the corner top-left, top-right, bottom-left, bottom-right.
     def sort_corners(self, corners):
         new_corners = sorted(((corners[0][0], corners[0][1]), (corners[1][0], corners[1][1]), (corners[2][0], corners[2][1]),
                    (corners[3][0], corners[3][1])), key=lambda x: x[1])
@@ -126,7 +134,7 @@ class SelectCornersInterface:
 
         return new_corners
 
-    # Method to improve the localization of corner points
+    # Method to improve the localization of corner points.
     def improve_localization(self, corners):
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
