@@ -1,6 +1,6 @@
 # Computer Vision: Camera calibration assignment
 # Creators: Gino Kuiper en Sander van Bennekom
-# Date: 17-02-2023
+# Date: 19-02-2023
 # Recourses: docs.opencv.org
 
 import cv2
@@ -10,7 +10,7 @@ from scipy.interpolate import interp1d
 
 class SelectCornersInterface:
     """ An instance of this class is an interface in which the four corner points of a chessboard
-    can be selected manually. The class has a method to interpolate the
+    can be selected manually. The class has a method to interpolate the x or y-coordinates of the
     remaining corners that are between the four selected corners. """
     def __init__(self, path, board_shape):
         self.board_shape = board_shape
@@ -80,7 +80,6 @@ class SelectCornersInterface:
 
     # Method to linearly interpolate the inner corners.
     def interpolate_points(self, corners, height, width):
-        # Array for calculated
         calculated_corners = []
 
         # Sort corners
@@ -117,6 +116,7 @@ class SelectCornersInterface:
                                                 top_points[i][1] + (j * step_size)])
             calculated_corners.append([bottom_points[i][0], bottom_points[i][1]])
 
+        # Store the calculated corners and improve the localization of each corner
         interpolated_corners = np.array(calculated_corners, dtype=np.float32).reshape(((self.board_shape[0]+1)*(self.board_shape[1]+1), 1, 2))
         self.improve_localization(interpolated_corners)
 
